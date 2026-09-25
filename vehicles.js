@@ -1,8 +1,9 @@
 /**
  * Vehicle Profiles & Acoustic Configurations
- * Optimized for real-world 0-130 km/h driving:
- * Full gear spectrum, shifts, rev limiter screams, and pops are mapped
- * dynamically so you experience 0-350 km/h drama without dangerous speeding.
+ * Optimized gear progression:
+ * - 0 - 130 km/h: Gears 1 to 5 provide rapid shifting, 2nd gear screams, and high-RPM action.
+ * - 130+ km/h: Overdrive gears (6th & 7th, or 5th in Tofaş) extend smoothly up to 260-280 km/h
+ *   so you can cruise at 140, 160, 200+ km/h without hitting a brick wall or endless rev limiter!
  */
 
 const VEHICLE_PROFILES = [
@@ -23,20 +24,20 @@ const VEHICLE_PROFILES = [
         hasTurbo: false,
         hasSupercharger: false,
         gears: [
-            { ratio: 3.91, maxSpeed: 26 }, // 1. Vites kalkış
-            { ratio: 2.17, maxSpeed: 48 }, // 2. Vites meşhur bağırtma!
-            { ratio: 1.41, maxSpeed: 75 }, // 3. Vites ara hızlanma
-            { ratio: 1.00, maxSpeed: 105 },// 4. Vites düzlük
-            { ratio: 0.81, maxSpeed: 135 } // 5. Vites otoban
+            { ratio: 3.91, maxSpeed: 28 },  // 1. Vites: kalkış
+            { ratio: 2.17, maxSpeed: 55 },  // 2. Vites: meşhur 2. vites bağırtması!
+            { ratio: 1.41, maxSpeed: 88 },  // 3. Vites: ara hızlanma & çatara patara
+            { ratio: 1.00, maxSpeed: 128 }, // 4. Vites: 128 km/h'ye kadar 4 vites devirip patlatır!
+            { ratio: 0.81, maxSpeed: 215 }  // 5. Vites: 130-215 km/h otoban uzun vites, kesiciye girmez!
         ],
         finalDrive: 4.10,
         harmonics: [
-            { multiplier: 1.0, gain: 0.60, detune: 6, waveType: 'deep' },  // Krank gövde vuruşu
-            { multiplier: 2.0, gain: 0.72 },                              // 4-silindir metalik abart rezonansı
-            { multiplier: 3.0, gain: 0.38 },                              // Vanalı egzoz yırtılması
-            { multiplier: 4.0, gain: 0.22 }                               // Subap şakırtısı & teneke tınısı
+            { multiplier: 1.0, gain: 0.60, detune: 6, waveType: 'deep' },
+            { multiplier: 2.0, gain: 0.72 },
+            { multiplier: 3.0, gain: 0.38 },
+            { multiplier: 4.0, gain: 0.22 }
         ],
-        soundDescription: 'Efsane 1.6 SLX Tempra motoru, 2. viteste bağırtma, vanalı abart egzoz rezonansı ve çatara patara egzoz patlatması.'
+        soundDescription: 'Efsane 1.6 SLX Tempra motoru, 2. viteste bağırtma, vanalı abart egzoz rezonansı ve çatara patara egzoz patlatması (0-215 km/h).'
     },
     {
         id: 'tofas_sahin_varex',
@@ -55,11 +56,11 @@ const VEHICLE_PROFILES = [
         hasTurbo: false,
         hasSupercharger: false,
         gears: [
-            { ratio: 4.00, maxSpeed: 25 },
-            { ratio: 2.22, maxSpeed: 46 }, // 2. vites dip gaz kesici
-            { ratio: 1.44, maxSpeed: 72 },
-            { ratio: 1.02, maxSpeed: 102 },
-            { ratio: 0.83, maxSpeed: 132 }
+            { ratio: 4.00, maxSpeed: 28 },
+            { ratio: 2.22, maxSpeed: 54 },  // 2. viteste dip gaz kesiciye girer!
+            { ratio: 1.44, maxSpeed: 86 },
+            { ratio: 1.02, maxSpeed: 126 },
+            { ratio: 0.83, maxSpeed: 210 }  // 5. vites otoban
         ],
         finalDrive: 4.10,
         harmonics: [
@@ -88,13 +89,13 @@ const VEHICLE_PROFILES = [
         hasSupercharger: true,
         superchargerRatio: 1.8,
         gears: [
-            { ratio: 3.14, maxSpeed: 24 },
-            { ratio: 2.05, maxSpeed: 42 },
-            { ratio: 1.43, maxSpeed: 62 },
-            { ratio: 1.10, maxSpeed: 82 },
-            { ratio: 0.86, maxSpeed: 102 },
-            { ratio: 0.68, maxSpeed: 120 },
-            { ratio: 0.56, maxSpeed: 135 }
+            { ratio: 3.14, maxSpeed: 26 },
+            { ratio: 2.05, maxSpeed: 48 },  // 2. vites çığlık
+            { ratio: 1.43, maxSpeed: 72 },
+            { ratio: 1.10, maxSpeed: 98 },
+            { ratio: 0.86, maxSpeed: 126 }, // 126 km/h'ye kadar 5 vites!
+            { ratio: 0.68, maxSpeed: 170 }, // 6. vites
+            { ratio: 0.56, maxSpeed: 270 }  // 7. vites uzun otoban
         ],
         finalDrive: 3.73,
         harmonics: [
@@ -103,7 +104,7 @@ const VEHICLE_PROFILES = [
             { multiplier: 3.0, gain: 0.28 },
             { multiplier: 4.0, gain: 0.18 }
         ],
-        soundDescription: 'Tok 5.2L Amerikan V8 homurtusu ve yüksek devirde yırtıcı kompresör ıslığı (0-130 km/h optimize).'
+        soundDescription: 'Tok 5.2L Amerikan V8 homurtusu ve yüksek devirde yırtıcı kompresör ıslığı (0-270 km/h).'
     },
     {
         id: 'porsche_gt3',
@@ -122,13 +123,13 @@ const VEHICLE_PROFILES = [
         hasTurbo: false,
         hasSupercharger: false,
         gears: [
-            { ratio: 3.75, maxSpeed: 25 },
-            { ratio: 2.38, maxSpeed: 44 },
-            { ratio: 1.72, maxSpeed: 65 },
-            { ratio: 1.34, maxSpeed: 86 },
-            { ratio: 1.11, maxSpeed: 105 },
-            { ratio: 0.96, maxSpeed: 122 },
-            { ratio: 0.84, maxSpeed: 138 }
+            { ratio: 3.75, maxSpeed: 28 },
+            { ratio: 2.38, maxSpeed: 52 },
+            { ratio: 1.72, maxSpeed: 76 },
+            { ratio: 1.34, maxSpeed: 102 },
+            { ratio: 1.11, maxSpeed: 130 }, // 130 km/h'de 5. vitese geçer!
+            { ratio: 0.96, maxSpeed: 175 }, // 6. vites
+            { ratio: 0.84, maxSpeed: 275 }  // 7. vites
         ],
         finalDrive: 3.97,
         harmonics: [
@@ -137,7 +138,7 @@ const VEHICLE_PROFILES = [
             { multiplier: 3.0, gain: 0.32 },
             { multiplier: 4.5, gain: 0.12 }
         ],
-        soundDescription: '4.0L safkan atmosferik Flat-6 boksör kükremesi ve 9.000 devir çığlığı (0-130 km/h optimize).'
+        soundDescription: '4.0L safkan atmosferik Flat-6 boksör kükremesi ve 9.000 devir çığlığı (0-275 km/h).'
     },
     {
         id: 'lambo_v10',
@@ -156,13 +157,13 @@ const VEHICLE_PROFILES = [
         hasTurbo: false,
         hasSupercharger: false,
         gears: [
-            { ratio: 3.91, maxSpeed: 26 },
-            { ratio: 2.44, maxSpeed: 45 },
-            { ratio: 1.81, maxSpeed: 66 },
-            { ratio: 1.40, maxSpeed: 88 },
-            { ratio: 1.13, maxSpeed: 108 },
-            { ratio: 0.94, maxSpeed: 124 },
-            { ratio: 0.79, maxSpeed: 140 }
+            { ratio: 3.91, maxSpeed: 28 },
+            { ratio: 2.44, maxSpeed: 52 },
+            { ratio: 1.81, maxSpeed: 78 },
+            { ratio: 1.40, maxSpeed: 104 },
+            { ratio: 1.13, maxSpeed: 132 },
+            { ratio: 0.94, maxSpeed: 175 },
+            { ratio: 0.79, maxSpeed: 280 }
         ],
         finalDrive: 3.73,
         harmonics: [
@@ -190,13 +191,13 @@ const VEHICLE_PROFILES = [
         hasTurbo: false,
         hasSupercharger: false,
         gears: [
-            { ratio: 3.40, maxSpeed: 28 },
-            { ratio: 2.19, maxSpeed: 48 },
-            { ratio: 1.63, maxSpeed: 70 },
-            { ratio: 1.29, maxSpeed: 92 },
-            { ratio: 1.03, maxSpeed: 112 },
-            { ratio: 0.84, maxSpeed: 128 },
-            { ratio: 0.63, maxSpeed: 142 }
+            { ratio: 3.40, maxSpeed: 30 },
+            { ratio: 2.19, maxSpeed: 55 },
+            { ratio: 1.63, maxSpeed: 82 },
+            { ratio: 1.29, maxSpeed: 108 },
+            { ratio: 1.03, maxSpeed: 135 },
+            { ratio: 0.84, maxSpeed: 180 },
+            { ratio: 0.63, maxSpeed: 290 }
         ],
         finalDrive: 4.38,
         harmonics: [
@@ -224,13 +225,13 @@ const VEHICLE_PROFILES = [
         hasTurbo: true,
         hasSupercharger: false,
         gears: [
-            { ratio: 3.56, maxSpeed: 22 },
-            { ratio: 2.14, maxSpeed: 40 },
-            { ratio: 1.48, maxSpeed: 60 },
-            { ratio: 1.11, maxSpeed: 80 },
-            { ratio: 0.87, maxSpeed: 100 },
-            { ratio: 0.69, maxSpeed: 118 },
-            { ratio: 0.57, maxSpeed: 135 }
+            { ratio: 3.56, maxSpeed: 25 },
+            { ratio: 2.14, maxSpeed: 48 },
+            { ratio: 1.48, maxSpeed: 72 },
+            { ratio: 1.11, maxSpeed: 98 },
+            { ratio: 0.87, maxSpeed: 128 },
+            { ratio: 0.69, maxSpeed: 168 },
+            { ratio: 0.57, maxSpeed: 260 }
         ],
         finalDrive: 4.05,
         harmonics: [
@@ -257,7 +258,7 @@ const VEHICLE_PROFILES = [
         hasTurbo: false,
         hasSupercharger: false,
         gears: [
-            { ratio: 1.0, maxSpeed: 140 }
+            { ratio: 1.0, maxSpeed: 260 }
         ],
         finalDrive: 1.0,
         harmonics: [
@@ -265,7 +266,7 @@ const VEHICLE_PROFILES = [
             { multiplier: 1.0, gain: 0.45 },
             { multiplier: 2.0, gain: 0.20 }
         ],
-        soundDescription: 'Derin hipersürücü warp titreşimi ve alt frekans kuantum itişi (0-130 km/h).'
+        soundDescription: 'Derin hipersürücü warp titreşimi ve alt frekans kuantum itişi (0-260 km/h).'
     }
 ];
 

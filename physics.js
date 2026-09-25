@@ -133,11 +133,18 @@ class VehiclePhysics {
             this.currentGear = 1;
         } else {
             const gears = this.profile.gears;
+            const isTopGear = this.currentGear >= gears.length;
             const gearConfig = gears[this.currentGear - 1] || gears[0];
-            const maxSpeed = gearConfig.maxSpeed || 45;
+            const maxSpeed = gearConfig.maxSpeed || 50;
 
-            // Direct 0-130 km/h acoustic mapping:
-            const calculatedRpm = (this.currentSpeedKmh / maxSpeed) * this.profile.redlineRpm;
+            // Direct acoustic mapping:
+            let calculatedRpm = (this.currentSpeedKmh / maxSpeed) * this.profile.redlineRpm;
+
+            // In top gear, prevent perpetual rev-limiter when driving fast on highway:
+            if (isTopGear && calculatedRpm >= this.profile.redlineRpm) {
+                calculatedRpm = this.profile.redlineRpm - 100;
+            }
+
             this.targetRpm = Math.max(this.profile.idleRpm, calculatedRpm);
 
             // Automatic transmission logic with dynamic kickdown & 2nd gear hold
@@ -145,8 +152,8 @@ class VehiclePhysics {
                 this._handleAutoShifting();
             }
 
-            // Rev limiter check ("tatatata" kesici)
-            if (this.currentRpm >= this.profile.redlineRpm) {
+            // Rev limiter check ("tatatata" kesici) - active in lower gears when screaming to redline:
+            if (!isTopGear && this.currentRpm >= this.profile.redlineRpm) {
                 this.audio.triggerRevLimiter();
                 this.currentRpm = this.profile.redlineRpm - 120;
             }
@@ -240,9 +247,9 @@ class VehiclePhysics {
 
         if (this.simPedalDown) {
             this.targetThrottle = 1.0;
-            // Rapid sports acceleration through the 0-130 range
+            // Sports acceleration through full speed range up to 260 km/h
             targetAccel = 8.5;
-            this.currentSpeedKmh = Math.min(138, this.currentSpeedKmh + targetAccel * dt * 3.6);
+            this.currentSpeedKmh = Math.min(260, this.currentSpeedKmh + targetAccel * dt * 3.6);
         } else if (this.simBrakeDown) {
             this.targetThrottle = 0.0;
             targetAccel = -14.0;
@@ -271,7 +278,7 @@ class VehiclePhysics {
     }
 
     setManualSpeedKmh(val) {
-        this.targetSpeedKmh = Math.max(0, Math.min(140, val));
+        this.targetSpeedKmh = Math.max(0, Math.min(260, val));
         this.currentSpeedKmh = this.targetSpeedKmh;
     }
 }
