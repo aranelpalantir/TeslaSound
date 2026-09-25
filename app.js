@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isEngineRunning = true;
 
                 mainStartBtn.classList.add('running');
-                startBtnText.textContent = 'SES AKTİF (DURDUR)';
+                startBtnText.textContent = 'MOTORU DURDUR';
 
                 requestWakeLock();
 
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             audio.stop();
 
             mainStartBtn.classList.remove('running');
-            startBtnText.textContent = 'SESİ AÇ / BAŞLAT';
+            startBtnText.textContent = 'MOTORU ÇALIŞTIR';
 
             stopGpsTracking();
             releaseWakeLock();
