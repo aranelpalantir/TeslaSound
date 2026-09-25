@@ -1,7 +1,9 @@
 /**
- * ApexRev - Physics & Vehicle Dynamics Simulation
- * Handles GPS smoothing, predictive acceleration estimation, automatic transmission,
- * manual paddle shifts, and realistic inertia modeling.
+ * TeslaSound - Physics & Vehicle Dynamics Simulation
+ * Tuned for 0-130 km/h real-world driving:
+ * - Dynamic kickdown & 2nd gear hold on acceleration
+ * - Highly responsive GPS acceleration-to-throttle curve
+ * - Authentic gear ratio RPM progression across 0-130 km/h
  */
 
 class VehiclePhysics {
@@ -12,7 +14,6 @@ class VehiclePhysics {
         // Dynamic State
         this.currentSpeedKmh = 0;       // Displayed / simulated speed in km/h
         this.targetSpeedKmh = 0;        // Target speed from GPS or manual slider
-        this.smoothedSpeedKmh = 0;
         this.currentRpm = 900;
         this.targetRpm = 900;
         this.throttle = 0.0;            // 0.0 (idle/brake) to 1.0 (WOT)
@@ -24,16 +25,13 @@ class VehiclePhysics {
         // Shifting state
         this.isShifting = false;
         this.shiftStartTime = 0;
-        this.shiftDurationMs = 120;     // Fast DCT shift
+        this.shiftDurationMs = 100;     // Fast crisp shift
 
         // GPS tracking metadata
         this.lastGpsTimestamp = 0;
         this.lastGpsSpeedMs = 0;
         this.gpsAccuracy = null;
         this.gpsActive = false;
-
-        // Constants for standard wheel dimensions (Tesla Model 3/Y 235/40 R19 ~ 0.67m diameter)
-        this.wheelCircumferenceMeters = 2.10; 
 
         // Simulation parameters
         this.isSimulating = false;
@@ -50,7 +48,7 @@ class VehiclePhysics {
     }
 
     /**
-     * Ingest new GPS position data from navigator.geolocation
+     * Ingest GPS position data with highly sensitive acceleration detection
      */
     handleGpsUpdate(position) {
         if (!this.isEngineRunning) return;
@@ -59,35 +57,35 @@ class VehiclePhysics {
         this.gpsActive = true;
         this.gpsAccuracy = coords.accuracy;
 
-        // coords.speed is in meters per second (null if device cannot calculate)
         let speedMs = coords.speed;
-
         if (speedMs === null || isNaN(speedMs) || speedMs < 0) {
             speedMs = 0;
         }
 
-        // Convert to km/h
         const speedKmh = Math.max(0, speedMs * 3.6);
         this.targetSpeedKmh = speedKmh;
 
         // Calculate real acceleration from GPS points
         if (this.lastGpsTimestamp > 0 && now > this.lastGpsTimestamp) {
             const dtSeconds = (now - this.lastGpsTimestamp) / 1000;
-            if (dtSeconds > 0.2 && dtSeconds < 4.0) {
+            if (dtSeconds > 0.15 && dtSeconds < 4.0) {
                 const dv = speedMs - this.lastGpsSpeedMs;
                 this.acceleration = dv / dtSeconds;
 
-                // Estimate throttle based on acceleration
-                if (this.acceleration > 1.8) {
-                    this.targetThrottle = 1.0; // Hard acceleration
-                } else if (this.acceleration > 0.8) {
-                    this.targetThrottle = 0.75;
-                } else if (this.acceleration > 0.2) {
-                    this.targetThrottle = 0.45;
-                } else if (this.acceleration > -0.3 && speedKmh > 5) {
-                    this.targetThrottle = 0.20; // Cruising
+                // High-sensitivity throttle mapping for real road driving:
+                // Gentle press -> high sound, spirited pull -> 100% full roar!
+                if (this.acceleration > 1.2) {
+                    this.targetThrottle = 1.0; // Dip gaz / Kickdown!
+                } else if (this.acceleration > 0.6) {
+                    this.targetThrottle = 0.85; // Güçlü ivmelenme
+                } else if (this.acceleration > 0.25) {
+                    this.targetThrottle = 0.65; // Belirgin hızlanma
+                } else if (this.acceleration > 0.08) {
+                    this.targetThrottle = 0.40; // Hafif gaz verme
+                } else if (this.acceleration > -0.3 && speedKmh > 3) {
+                    this.targetThrottle = 0.15; // Sabit hızda akma (cruising)
                 } else {
-                    this.targetThrottle = 0.0; // Deceleration / engine braking
+                    this.targetThrottle = 0.0; // Gaz bırakma / kompresyon / egzoz patlatma
                 }
             }
         }
@@ -97,7 +95,7 @@ class VehiclePhysics {
     }
 
     /**
-     * Physics tick called every animation frame (dt in seconds)
+     * Physics tick called every animation frame
      */
     update(dt) {
         if (!this.profile) return;
@@ -118,68 +116,88 @@ class VehiclePhysics {
         if (this.isSimulating) {
             this._updateSimulation(dt);
         } else {
-            // GPS dead-reckoning smoothing (eliminates 1Hz GPS stutter)
-            const speedSmoothingFactor = Math.min(1.0, dt * 5.0);
+            // GPS dead-reckoning smoothing
+            const speedSmoothingFactor = Math.min(1.0, dt * 6.0);
             this.currentSpeedKmh += (this.targetSpeedKmh - this.currentSpeedKmh) * speedSmoothingFactor;
         }
 
-        // Throttle response smoothing (rapid rise, smooth fall)
-        const throttleSmoothing = this.targetThrottle > this.throttle ? Math.min(1.0, dt * 14.0) : Math.min(1.0, dt * 7.0);
+        // Throttle response smoothing (instant attack, organic decay)
+        const throttleSmoothing = this.targetThrottle > this.throttle ? Math.min(1.0, dt * 18.0) : Math.min(1.0, dt * 8.0);
         this.throttle += (this.targetThrottle - this.throttle) * throttleSmoothing;
         this.throttle = Math.max(0, Math.min(1, this.throttle));
 
         // Calculate RPM based on current speed and gear ratio
-        if (this.currentSpeedKmh < 0.5) {
-            // Vehicle stopped / idling
-            this.targetRpm = this.profile.idleRpm + (this.throttle * 4000); // Revving in neutral/park
+        if (this.currentSpeedKmh < 0.6) {
+            // Vehicle stopped / idling quietly
+            this.targetRpm = this.profile.idleRpm + (this.throttle * 3800);
             this.currentGear = 1;
         } else {
-            const gearConfig = this.profile.gears[this.currentGear - 1] || this.profile.gears[0];
-            const speedMps = (this.currentSpeedKmh * 1000) / 3600;
-            const wheelRps = speedMps / this.wheelCircumferenceMeters;
-            const calculatedRpm = wheelRps * gearConfig.ratio * this.profile.finalDrive * 60;
+            const gears = this.profile.gears;
+            const gearConfig = gears[this.currentGear - 1] || gears[0];
+            const maxSpeed = gearConfig.maxSpeed || 45;
 
+            // Direct 0-130 km/h acoustic mapping:
+            const calculatedRpm = (this.currentSpeedKmh / maxSpeed) * this.profile.redlineRpm;
             this.targetRpm = Math.max(this.profile.idleRpm, calculatedRpm);
 
-            // Automatic transmission logic
+            // Automatic transmission logic with dynamic kickdown & 2nd gear hold
             if (this.transmissionMode === 'auto' && !this.isShifting) {
                 this._handleAutoShifting();
             }
 
-            // Rev limiter check
+            // Rev limiter check ("tatatata" kesici)
             if (this.currentRpm >= this.profile.redlineRpm) {
                 this.audio.triggerRevLimiter();
-                this.currentRpm = this.profile.redlineRpm - 150;
+                this.currentRpm = this.profile.redlineRpm - 120;
             }
         }
 
         // RPM inertia smoothing
-        const rpmSmoothing = Math.min(1.0, dt * 18.0);
+        const rpmSmoothing = Math.min(1.0, dt * 20.0);
         this.currentRpm += (this.targetRpm - this.currentRpm) * rpmSmoothing;
 
         // Send state to audio engine
         this.audio.update(this.currentRpm, this.throttle, this.currentSpeedKmh, this.acceleration);
     }
 
+    /**
+     * Automatic Transmission with "2. Viteste Bağırtma" & Kickdown
+     */
     _handleAutoShifting() {
         const gears = this.profile.gears;
         const totalGears = gears.length;
 
-        // Upshift condition: RPM exceeds shift threshold
-        if (this.currentRpm >= this.profile.shiftRpm && this.currentGear < totalGears) {
+        // Hard acceleration check: holds lower gears (especially 2nd gear) longer!
+        const isAccelerating = this.acceleration > 0.35 || this.throttle > 0.45;
+        
+        // When stepping on the gas, shift at the very redline limit (e.g. 96%); when cruising, shift earlier
+        const dynamicShiftRpm = isAccelerating 
+            ? (this.profile.redlineRpm - 180) 
+            : (this.profile.shiftRpm || this.profile.redlineRpm * 0.82);
+
+        // KICKDOWN (Ara hızlanmada 2. vitese çekip bağırtma):
+        // If accelerating hard and current gear is 3 or higher, check if dropping to a lower gear screams into powerband
+        if (isAccelerating && this.currentGear > 1) {
+            const lowerGearConfig = gears[this.currentGear - 2];
+            const projectedRpm = (this.currentSpeedKmh / lowerGearConfig.maxSpeed) * this.profile.redlineRpm;
+            // Downshift if projected RPM won't blow past redline
+            if (projectedRpm < (this.profile.redlineRpm - 250)) {
+                this.shiftDown();
+                return;
+            }
+        }
+
+        // Upshift condition
+        if (this.currentRpm >= dynamicShiftRpm && this.currentGear < totalGears) {
             this.shiftUp();
             return;
         }
 
-        // Downshift condition: RPM drops too low while vehicle is moving
+        // Downshift condition when decelerating
         if (this.currentGear > 1) {
-            const lowerGear = gears[this.currentGear - 2];
-            const speedMps = (this.currentSpeedKmh * 1000) / 3600;
-            const wheelRps = speedMps / this.wheelCircumferenceMeters;
-            const projectedRpm = wheelRps * lowerGear.ratio * this.profile.finalDrive * 60;
-
-            // Only downshift if the projected RPM won't exceed redline - 800
-            if (this.currentRpm < (this.profile.idleRpm + 1400) && projectedRpm < (this.profile.redlineRpm - 800)) {
+            const lowerGearConfig = gears[this.currentGear - 2];
+            const projectedRpm = (this.currentSpeedKmh / lowerGearConfig.maxSpeed) * this.profile.redlineRpm;
+            if (this.currentRpm < (this.profile.idleRpm + 600) && projectedRpm < (this.profile.redlineRpm - 500)) {
                 this.shiftDown();
             }
         }
@@ -206,33 +224,33 @@ class VehiclePhysics {
 
         // Rev-match throttle blip
         const originalThrottle = this.throttle;
-        this.throttle = Math.min(1.0, this.throttle + 0.5);
+        this.throttle = Math.min(1.0, this.throttle + 0.45);
 
         setTimeout(() => {
             this.isShifting = false;
             this.throttle = originalThrottle;
-        }, this.shiftDurationMs + 60);
+        }, this.shiftDurationMs + 50);
     }
 
     /**
-     * Simulator test bench physics (allows testing without driving)
+     * Simulator test bench physics
      */
     _updateSimulation(dt) {
         let targetAccel = 0;
 
         if (this.simPedalDown) {
             this.targetThrottle = 1.0;
-            // Realistic fast sports car acceleration (0-100 in 3.4s -> ~8 m/s^2)
-            targetAccel = 7.5;
-            this.currentSpeedKmh += targetAccel * dt * 3.6;
+            // Rapid sports acceleration through the 0-130 range
+            targetAccel = 8.5;
+            this.currentSpeedKmh = Math.min(138, this.currentSpeedKmh + targetAccel * dt * 3.6);
         } else if (this.simBrakeDown) {
             this.targetThrottle = 0.0;
-            targetAccel = -12.0; // Hard braking
+            targetAccel = -14.0;
             this.currentSpeedKmh = Math.max(0, this.currentSpeedKmh + targetAccel * dt * 3.6);
         } else {
-            // Coasting with gentle rolling friction and aerodynamic drag
+            // Coasting
             this.targetThrottle = 0.0;
-            targetAccel = -1.2;
+            targetAccel = -1.5;
             this.currentSpeedKmh = Math.max(0, this.currentSpeedKmh + targetAccel * dt * 3.6);
         }
 
@@ -253,7 +271,7 @@ class VehiclePhysics {
     }
 
     setManualSpeedKmh(val) {
-        this.targetSpeedKmh = Math.max(0, Math.min(350, val));
+        this.targetSpeedKmh = Math.max(0, Math.min(140, val));
         this.currentSpeedKmh = this.targetSpeedKmh;
     }
 }

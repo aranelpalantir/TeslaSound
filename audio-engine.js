@@ -1,8 +1,10 @@
 /**
- * TeslaSound - Deep Acoustic Engine (Tok & Bas Odaklı)
- * Anchored to true crankshaft mechanical rotation (RPM / 60),
- * massive 110Hz body resonance (+14dB low-shelf), custom rounded pressure-pulse
- * waveforms, and a steep brickwall low-pass filter cutting off harsh high frequencies.
+ * TeslaSound - Dynamic Acoustic Engine
+ * Tuned for 0-130 km/h driving:
+ * - Silent/Gentle Idle (NO boomy drone/hum when stopped or starting)
+ * - Explosive roar & screaming high-RPM frequencies during acceleration
+ * - Dynamic 2nd gear hold & kickdown scream
+ * - Iconic Tofaş (Doğan/Şahin) vanalı abart egzoz, çatara patara, and rapid kesici
  */
 
 class VehicleAudioEngine {
@@ -18,23 +20,24 @@ class VehicleAudioEngine {
         this.compressor = null;
         this.analyser = null;
 
-        // Custom rounded acoustic pressure wave (eliminates harsh digital saw buzz)
+        // Custom Organic Combustion Waveforms
         this.pressurePulseWave = null;
         this.deepRumbleWave = null;
+        this.tofasRaspWave = null;
 
-        // Heavy Bass Resonator Network
-        this.lowShelfFilter = null;     // Massive +14 dB bass boost around 95 Hz
-        this.exhaustCavityFilter = null; // Peaking filter for muffler box boom at 75 Hz
-        this.manifoldFilter = null;      // Throat resonance at 110-180 Hz
-        this.exhaustFilter1 = null;      // Stage 1 steep lowpass
-        this.exhaustFilter2 = null;      // Stage 2 brickwall lowpass
+        // Dynamic Resonator Network
+        this.lowShelfFilter = null;
+        this.exhaustCavityFilter = null;
+        this.manifoldFilter = null;
+        this.exhaustFilter1 = null;
+        this.exhaustFilter2 = null;
         this.distortionNode = null;
 
         // Oscillators for engine harmonics
         this.oscillators = [];
         this.oscGains = [];
 
-        // Sub-bass body shaker (30-50 Hz)
+        // Sub-Bass Body Shaker (Active ONLY during acceleration/driving, NEVER at idle)
         this.subBassOsc = null;
         this.subBassGain = null;
 
@@ -81,71 +84,70 @@ class VehicleAudioEngine {
             await this.ctx.resume();
         }
 
-        // Custom Organic Combustion Waveforms (Harmonics roll off fast, no screeching edges)
         this._buildCombustionWaveforms();
 
         // 1. Master Output Gain
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(this.masterVolume, this.ctx.currentTime);
 
-        // 2. Heavy-duty dynamics compressor (prevents bass clipping while giving maximum punch)
+        // 2. Dynamics compressor
         this.compressor = this.ctx.createDynamicsCompressor();
-        this.compressor.threshold.setValueAtTime(-18, this.ctx.currentTime);
-        this.compressor.knee.setValueAtTime(12, this.ctx.currentTime);
-        this.compressor.ratio.setValueAtTime(8, this.ctx.currentTime);
-        this.compressor.attack.setValueAtTime(0.004, this.ctx.currentTime);
-        this.compressor.release.setValueAtTime(0.12, this.ctx.currentTime);
+        this.compressor.threshold.setValueAtTime(-16, this.ctx.currentTime);
+        this.compressor.knee.setValueAtTime(10, this.ctx.currentTime);
+        this.compressor.ratio.setValueAtTime(6, this.ctx.currentTime);
+        this.compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+        this.compressor.release.setValueAtTime(0.10, this.ctx.currentTime);
 
         // 3. Analyser for visualizer
         this.analyser = this.ctx.createAnalyser();
         this.analyser.fftSize = 128;
-        this.analyser.smoothingTimeConstant = 0.82;
+        this.analyser.smoothingTimeConstant = 0.80;
 
         this.masterGain.connect(this.compressor);
         this.compressor.connect(this.analyser);
         this.analyser.connect(this.ctx.destination);
 
-        // 4. Engine Master Gain
+        // 4. Engine Master Gain - Starts at 0.0 (silent until rolling/accelerating)
         this.engineMasterGain = this.ctx.createGain();
         this.engineMasterGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
 
-        // 5. Warm analog soft saturation (warm tube compression)
+        // 5. Warm analog soft saturation
         this.distortionNode = this.ctx.createWaveShaper();
-        this.distortionNode.curve = this._makeWarmSaturationCurve(1.5);
+        this.distortionNode.curve = this._makeWarmSaturationCurve(1.6);
         this.distortionNode.oversample = '4x';
 
-        // 6. Massive Low-Shelf Filter (+14 dB at 95 Hz for thick, heavy exhaust displacement)
+        // 6. Low-Shelf Filter (Dynamic: gentle +3dB at idle, up to +12dB under load)
         this.lowShelfFilter = this.ctx.createBiquadFilter();
         this.lowShelfFilter.type = 'lowshelf';
-        this.lowShelfFilter.frequency.setValueAtTime(95, this.ctx.currentTime);
-        this.lowShelfFilter.gain.setValueAtTime(14.0, this.ctx.currentTime);
+        this.lowShelfFilter.frequency.setValueAtTime(100, this.ctx.currentTime);
+        this.lowShelfFilter.gain.setValueAtTime(3.0, this.ctx.currentTime);
 
-        // 7. Muffler Chamber Cavity Boom (peaking at 75 Hz, +8 dB)
+        // 7. Muffler Chamber Cavity
         this.exhaustCavityFilter = this.ctx.createBiquadFilter();
         this.exhaustCavityFilter.type = 'peaking';
-        this.exhaustCavityFilter.frequency.setValueAtTime(75, this.ctx.currentTime);
-        this.exhaustCavityFilter.Q.setValueAtTime(1.6, this.ctx.currentTime);
-        this.exhaustCavityFilter.gain.setValueAtTime(8.0, this.ctx.currentTime);
+        this.exhaustCavityFilter.frequency.setValueAtTime(80, this.ctx.currentTime);
+        this.exhaustCavityFilter.Q.setValueAtTime(1.4, this.ctx.currentTime);
+        this.exhaustCavityFilter.gain.setValueAtTime(4.0, this.ctx.currentTime);
 
-        // 8. Cylinder Manifold Resonance (warm throat at 110-180 Hz)
+        // 8. Cylinder Manifold Resonance
         this.manifoldFilter = this.ctx.createBiquadFilter();
         this.manifoldFilter.type = 'peaking';
-        this.manifoldFilter.frequency.setValueAtTime(130, this.ctx.currentTime);
-        this.manifoldFilter.Q.setValueAtTime(1.4, this.ctx.currentTime);
-        this.manifoldFilter.gain.setValueAtTime(6.0, this.ctx.currentTime);
+        this.manifoldFilter.frequency.setValueAtTime(140, this.ctx.currentTime);
+        this.manifoldFilter.Q.setValueAtTime(1.5, this.ctx.currentTime);
+        this.manifoldFilter.gain.setValueAtTime(5.0, this.ctx.currentTime);
 
-        // 9. Dual Low-Pass Filter Network (eliminates ALL tinny/thin highs; max cutoff 550-700 Hz)
+        // 9. Dual Low-Pass Filter Network
         this.exhaustFilter1 = this.ctx.createBiquadFilter();
         this.exhaustFilter1.type = 'lowpass';
-        this.exhaustFilter1.frequency.setValueAtTime(160, this.ctx.currentTime);
+        this.exhaustFilter1.frequency.setValueAtTime(220, this.ctx.currentTime);
         this.exhaustFilter1.Q.setValueAtTime(0.8, this.ctx.currentTime);
 
         this.exhaustFilter2 = this.ctx.createBiquadFilter();
         this.exhaustFilter2.type = 'lowpass';
-        this.exhaustFilter2.frequency.setValueAtTime(220, this.ctx.currentTime);
+        this.exhaustFilter2.frequency.setValueAtTime(350, this.ctx.currentTime);
         this.exhaustFilter2.Q.setValueAtTime(0.7, this.ctx.currentTime);
 
-        // 10. Sub-Bass Seat Shaker (32-52 Hz subwoofer vibration)
+        // 10. Sub-Bass Seat Shaker (Starts muted: 0.0)
         this.subBassGain = this.ctx.createGain();
         this.subBassGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
         this.subBassOsc = this.ctx.createOscillator();
@@ -155,15 +157,12 @@ class VehicleAudioEngine {
         this.subBassGain.connect(this.engineMasterGain);
         this.subBassOsc.start();
 
-        // 11. Mechanical low rumble
+        // 11. Mechanical & Turbo layers
         this._initNoiseLayer();
-
-        // 12. Turbo & Supercharger
         this._initTurboLayer();
         this._initSuperchargerLayer();
 
         // Wire Audio Graph
-        // [Sources] -> engineMasterGain -> distortionNode -> lowShelf -> exhaustCavity -> manifold -> exhaust1 -> exhaust2 -> masterGain
         this.engineMasterGain.connect(this.distortionNode);
         this.distortionNode.connect(this.lowShelfFilter);
         this.lowShelfFilter.connect(this.exhaustCavityFilter);
@@ -176,41 +175,38 @@ class VehicleAudioEngine {
         this.isRunning = false;
     }
 
-    /**
-     * Custom Fourier Series for smooth, bass-heavy combustion pressure waves
-     * (Zero harsh high-frequency harmonics)
-     */
     _buildCombustionWaveforms() {
         const nCoeffs = 32;
-        const real = new Float32Array(nCoeffs);
-        const imag = new Float32Array(nCoeffs);
 
-        // 1. Pressure pulse wave: heavy fundamental, warm 2nd/3rd harmonic, zero high fizz
-        real[0] = 0;
-        imag[0] = 0;
-        real[1] = 0; imag[1] = 1.0;   // Fundamental (deep thud)
-        real[2] = 0; imag[2] = 0.65;  // 2nd harmonic (exhaust pair)
-        real[3] = 0; imag[3] = 0.30;  // 3rd harmonic (throat)
-        real[4] = 0; imag[4] = 0.12;  // 4th harmonic
-        real[5] = 0; imag[5] = 0.04;
-        for (let i = 6; i < nCoeffs; i++) {
-            real[i] = 0;
-            imag[i] = 0;
-        }
-        this.pressurePulseWave = this.ctx.createPeriodicWave(real, imag);
+        // 1. Organic Pressure Pulse
+        const real1 = new Float32Array(nCoeffs);
+        const imag1 = new Float32Array(nCoeffs);
+        real1[1] = 0; imag1[1] = 1.0;
+        real1[2] = 0; imag1[2] = 0.60;
+        real1[3] = 0; imag1[3] = 0.28;
+        real1[4] = 0; imag1[4] = 0.10;
+        this.pressurePulseWave = this.ctx.createPeriodicWave(real1, imag1);
 
-        // 2. Sub-rumble wave: ultra-deep asymmetrical lope
-        const r2 = new Float32Array(nCoeffs);
-        const i2 = new Float32Array(nCoeffs);
-        r2[1] = 0; i2[1] = 1.0;
-        r2[2] = 0; i2[2] = 0.40;
-        r2[3] = 0; i2[3] = 0.10;
-        for (let i = 4; i < nCoeffs; i++) { r2[i] = 0; i2[i] = 0; }
-        this.deepRumbleWave = this.ctx.createPeriodicWave(r2, i2);
+        // 2. Sub-Rumble Deep Wave
+        const real2 = new Float32Array(nCoeffs);
+        const imag2 = new Float32Array(nCoeffs);
+        real2[1] = 0; imag2[1] = 1.0;
+        real2[2] = 0; imag2[2] = 0.35;
+        this.deepRumbleWave = this.ctx.createPeriodicWave(real2, imag2);
+
+        // 3. Tofaş & High-Rev Rasp Wave (crisp metallic abart exhaust character)
+        const real3 = new Float32Array(nCoeffs);
+        const imag3 = new Float32Array(nCoeffs);
+        real3[1] = 0; imag3[1] = 1.0;
+        real3[2] = 0; imag3[2] = 0.75; // Strong 2nd harmonic (4-cylinder bark)
+        real3[3] = 0; imag3[3] = 0.45; // 3rd harmonic (open pipe rasp)
+        real3[4] = 0; imag3[4] = 0.25; // 4th harmonic (tinny exhaust buzz)
+        real3[5] = 0; imag3[5] = 0.12;
+        this.tofasRaspWave = this.ctx.createPeriodicWave(real3, imag3);
     }
 
     _makeWarmSaturationCurve(drive) {
-        const k = drive || 1.5;
+        const k = drive || 1.6;
         const n_samples = 44100;
         const curve = new Float32Array(n_samples);
         for (let i = 0; i < n_samples; ++i) {
@@ -272,7 +268,7 @@ class VehicleAudioEngine {
 
     _initSuperchargerLayer() {
         this.superchargerOsc = this.ctx.createOscillator();
-        this.superchargerOsc.type = 'sine'; // Pure sine for low whine, no harsh saw
+        this.superchargerOsc.type = 'sine';
         this.superchargerOsc.frequency.setValueAtTime(220, this.ctx.currentTime);
 
         const scFilter = this.ctx.createBiquadFilter();
@@ -289,13 +285,17 @@ class VehicleAudioEngine {
         this.superchargerOsc.start();
     }
 
+    /**
+     * Start engine cleanly without aggressive booming starter rumble
+     */
     start() {
         if (!this.ctx) return;
         this.isRunning = true;
         const now = this.ctx.currentTime;
         this.engineMasterGain.gain.cancelScheduledValues(now);
+        // Start very softly at idle level (0.16) so it never booms or vibrates while stopped
         this.engineMasterGain.gain.setValueAtTime(0.0, now);
-        this.engineMasterGain.gain.linearRampToValueAtTime(0.85, now + 0.1);
+        this.engineMasterGain.gain.linearRampToValueAtTime(0.18, now + 0.15);
     }
 
     stop() {
@@ -344,10 +344,14 @@ class VehicleAudioEngine {
             { multiplier: 2.0, gain: 0.40 }
         ];
 
+        const isTofas = profile.id.includes('tofas');
+
         harmonics.forEach((hConfig) => {
             const osc = this.ctx.createOscillator();
-            // Use organic combustion pressure pulse wave
-            if (this.pressurePulseWave && hConfig.useCustom !== false) {
+            
+            if (isTofas && this.tofasRaspWave) {
+                osc.setPeriodicWave(this.tofasRaspWave);
+            } else if (this.pressurePulseWave && hConfig.useCustom !== false) {
                 osc.setPeriodicWave(hConfig.waveType === 'deep' ? this.deepRumbleWave : this.pressurePulseWave);
             } else {
                 osc.type = hConfig.type || 'triangle';
@@ -371,91 +375,112 @@ class VehicleAudioEngine {
 
     /**
      * Dynamic Audio Update Loop
+     * - Idle: Calm, gentle purr (NO room-shaking drone)
+     * - Driving: Instant, explosive throttle response and high-rev scream
      */
     update(rpm, throttle, speedKmh, acceleration) {
         if (!this.isRunning || !this.isStarted || !this.currentProfile || this.isShifting) return;
 
         const now = this.ctx.currentTime;
         const profile = this.currentProfile;
+        const isStopped = speedKmh < 0.8 && throttle < 0.05;
 
-        // CRITICAL ACOUSTIC FIX FOR "TOK SES":
-        // Base frequency is anchored directly to Crankshaft Mechanical Rotational Speed (RPM / 60)!
-        // 800 RPM -> 13.3 Hz (sub-audible mechanical chug)
-        // 2500 RPM -> 41.6 Hz (deep chest-thump cruising rumble)
-        // 5000 RPM -> 83.3 Hz (visceral, deep bass roar)
-        // 7500 RPM -> 125 Hz (rich, heavy guttural roar, NOT a 500+ Hz thin beep)
-        const rotationFreq = Math.max(10, rpm / 60);
+        // Base mechanical rotation frequency (RPM / 60)
+        const rotationFreq = Math.max(12, rpm / 60);
 
-        // Sub-Bass Body Shaker (tuned between 30 Hz and 50 Hz to directly vibrate Tesla seats)
-        const subFreq = Math.max(28, Math.min(52, rotationFreq * 0.75));
-        this.subBassOsc.frequency.setTargetAtTime(subFreq, now, 0.04);
-        const subVolume = (0.50 + throttle * 0.65) * (this.exhaustMode === 'straight_pipe' ? 1.35 : 1.0);
-        this.subBassGain.gain.setTargetAtTime(subVolume, now, 0.05);
+        // 1. Sub-Bass Shaker Management:
+        // ELIMINATE IDLE DRONE: When stopped, sub-bass is 0.0!
+        // Only kicks in when vehicle is moving and under load
+        if (isStopped) {
+            this.subBassGain.gain.setTargetAtTime(0.0, now, 0.08);
+            this.lowShelfFilter.gain.setTargetAtTime(2.0, now, 0.08); // Relax low-shelf
+        } else {
+            const subFreq = Math.max(30, Math.min(54, rotationFreq * 0.80));
+            this.subBassOsc.frequency.setTargetAtTime(subFreq, now, 0.04);
+            // Dynamic sub punch proportional to throttle and positive acceleration
+            const accelPunch = Math.max(0, acceleration * 0.25);
+            const subVolume = Math.min(1.2, (0.20 + throttle * 0.70 + accelPunch) * (this.exhaustMode === 'straight_pipe' ? 1.3 : 1.0));
+            this.subBassGain.gain.setTargetAtTime(subVolume, now, 0.05);
 
-        // Update harmonic oscillators based on true rotation frequency
+            // Dynamic low shelf boost up to +12dB under heavy throttle
+            const dynamicShelf = 3.0 + throttle * 8.5;
+            this.lowShelfFilter.gain.setTargetAtTime(dynamicShelf, now, 0.06);
+        }
+
+        // 2. Harmonic Oscillators Frequency & Pitch
         this.oscillators.forEach((item) => {
             const targetFreq = rotationFreq * item.multiplier;
-            item.osc.frequency.setTargetAtTime(Math.max(14, targetFreq), now, 0.035);
+            item.osc.frequency.setTargetAtTime(Math.max(14, targetFreq), now, 0.03);
             if (item.detune) {
-                const wobble = Math.sin(now * 10) * item.detune;
+                const wobble = Math.sin(now * 12) * item.detune;
                 item.osc.detune.setTargetAtTime(wobble, now, 0.02);
             }
         });
 
-        // Update gains based on engine load
+        // 3. Engine Master Volume & Load Response:
+        // Idle is gentle (0.18). During acceleration bursts, volume dynamically surges!
+        const accelBoost = Math.max(0, Math.min(0.40, acceleration * 0.25));
+        const targetEngineGain = isStopped 
+            ? 0.18 
+            : Math.min(1.20, 0.75 + throttle * 0.25 + accelBoost);
+        this.engineMasterGain.gain.setTargetAtTime(targetEngineGain, now, isStopped ? 0.12 : 0.035);
+
+        // Update harmonic gains
         this.oscGains.forEach((item) => {
-            const loadMultiplier = 0.65 + throttle * 0.60;
+            const loadMultiplier = isStopped ? 0.35 : (0.65 + throttle * 0.65);
             item.gain.gain.setTargetAtTime(item.baseGain * loadMultiplier, now, 0.04);
         });
 
-        // Dual Stage Brickwall Low-Pass Filters (Cutting off thin/high buzz)
-        // Idle: 140-180 Hz (very deep, muffled bubbling lope)
-        // Full throttle: 480-680 Hz (maximum deep roar, zero shrillness)
+        // 4. Exhaust Filter Opening (Raspy high-RPM screams during 2nd gear pulls)
         let baseCutoff = profile.idleCutoff || 150;
-        let maxCutoff = profile.redlineCutoff || 580;
+        let maxCutoff = profile.redlineCutoff || 700;
         if (this.exhaustMode === 'quiet') maxCutoff *= 0.60;
-        if (this.exhaustMode === 'straight_pipe') maxCutoff *= 1.20;
+        if (this.exhaustMode === 'straight_pipe') maxCutoff *= 1.25;
 
         const rpmRatio = Math.max(0, Math.min(1, (rpm - profile.idleRpm) / (profile.redlineRpm - profile.idleRpm)));
-        const targetCutoff = baseCutoff + (maxCutoff - baseCutoff) * (rpmRatio * 0.40 + throttle * 0.60);
+        // Aggressive filter opening: even mid-throttle opens the pipes
+        const targetCutoff = isStopped 
+            ? baseCutoff 
+            : baseCutoff + (maxCutoff - baseCutoff) * (rpmRatio * 0.45 + throttle * 0.55);
 
-        this.exhaustFilter1.frequency.setTargetAtTime(Math.min(950, targetCutoff), now, 0.04);
-        this.exhaustFilter1.Q.setTargetAtTime(0.75 + throttle * 0.35, now, 0.05);
+        this.exhaustFilter1.frequency.setTargetAtTime(Math.min(1250, targetCutoff), now, 0.04);
+        this.exhaustFilter1.Q.setTargetAtTime(0.75 + throttle * 0.40, now, 0.05);
 
-        this.exhaustFilter2.frequency.setTargetAtTime(Math.min(1150, targetCutoff * 1.25), now, 0.04);
+        this.exhaustFilter2.frequency.setTargetAtTime(Math.min(1450, targetCutoff * 1.30), now, 0.04);
         this.exhaustFilter2.Q.setTargetAtTime(0.7, now, 0.05);
 
-        // Low-end air intake thrum
-        const intakeVolume = (0.02 + throttle * 0.05) * (rpm / profile.redlineRpm);
+        // 5. Intake & Air Rush
+        const intakeVolume = isStopped ? 0.0 : (0.02 + throttle * 0.08) * (rpm / profile.redlineRpm);
         this.noiseGain.gain.setTargetAtTime(intakeVolume, now, 0.05);
-        this.noiseFilter.frequency.setTargetAtTime(140 + rpm * 0.05, now, 0.05);
+        this.noiseFilter.frequency.setTargetAtTime(140 + rpm * 0.06, now, 0.05);
 
-        // Turbo Whine (warm, subtle low whistle)
+        // 6. Turbo Whine
         if (profile.hasTurbo) {
-            const turboSpool = Math.min(1.0, Math.max(0, throttle * 0.70 + (rpm / profile.redlineRpm) * 0.30));
-            const turboFreq = 300 + turboSpool * 650; // 300-950 Hz, deep and subtle
-            this.turboOsc.frequency.setTargetAtTime(turboFreq, now, 0.06);
-            this.turboFilter.frequency.setTargetAtTime(turboFreq, now, 0.06);
-            this.turboGain.gain.setTargetAtTime(turboSpool * 0.06, now, 0.08);
+            const turboSpool = isStopped ? 0.0 : Math.min(1.0, Math.max(0, throttle * 0.75 + (rpm / profile.redlineRpm) * 0.25));
+            const turboFreq = 300 + turboSpool * 700;
+            this.turboOsc.frequency.setTargetAtTime(turboFreq, now, 0.05);
+            this.turboFilter.frequency.setTargetAtTime(turboFreq, now, 0.05);
+            this.turboGain.gain.setTargetAtTime(turboSpool * 0.08, now, 0.06);
 
-            if (this.lastThrottle > 0.6 && throttle < 0.25 && rpm > 3200) {
+            if (this.lastThrottle > 0.55 && throttle < 0.20 && rpm > (profile.idleRpm + 1500)) {
                 this.triggerBlowOffValve();
             }
         }
 
-        // Supercharger Whine
+        // 7. Supercharger Whine
         if (profile.hasSupercharger) {
-            const scRatio = profile.superchargerRatio || 2.0;
-            const scFreq = Math.min(650, (rpm / 60) * scRatio * 2);
+            const scRatio = profile.superchargerRatio || 1.8;
+            const scFreq = Math.min(750, (rpm / 60) * scRatio * 2);
             this.superchargerOsc.frequency.setTargetAtTime(scFreq, now, 0.03);
-            const scVol = (0.01 + throttle * 0.06) * (rpm / profile.redlineRpm);
+            const scVol = isStopped ? 0.0 : (0.01 + throttle * 0.07) * (rpm / profile.redlineRpm);
             this.superchargerGain.gain.setTargetAtTime(scVol, now, 0.04);
         }
 
-        // Exhaust Cannon Pops & Thumps on Deceleration
-        const isDecelerating = acceleration < -1.1 || (throttle < 0.12 && this.lastThrottle > 0.45);
-        if (isDecelerating && rpm > (profile.idleRpm + 1600) && !this.popTimeout) {
-            if (Math.random() < (this.exhaustMode === 'straight_pipe' ? 0.85 : 0.50)) {
+        // 8. Deceleration Pops, Bangs & Overrun (Çatara Patara)
+        const isDecelerating = acceleration < -0.8 || (throttle < 0.15 && this.lastThrottle > 0.40);
+        if (isDecelerating && rpm > (profile.idleRpm + 1200) && !this.popTimeout && !isStopped) {
+            const popChance = (this.exhaustMode === 'straight_pipe' || profile.id.includes('tofas')) ? 0.88 : 0.55;
+            if (Math.random() < popChance) {
                 this.triggerPopAndBangs(rpm, profile);
             }
         }
@@ -465,16 +490,17 @@ class VehicleAudioEngine {
     }
 
     /**
-     * Trigger deep cannon exhaust thumps
+     * Trigger cannon exhaust thumps and crackles
      */
     triggerPopAndBangs(rpm, profile) {
         if (!this.isRunning || this.isShifting) return;
 
-        const count = 1 + Math.floor(Math.random() * 3);
+        const isTofas = profile.id.includes('tofas');
+        const count = isTofas ? (2 + Math.floor(Math.random() * 4)) : (1 + Math.floor(Math.random() * 3));
         let delay = 0;
 
         for (let i = 0; i < count; i++) {
-            delay += 60 + Math.random() * 80;
+            delay += 50 + Math.random() * 70;
             setTimeout(() => {
                 if (!this.ctx || !this.isRunning) return;
                 this._createSinglePop(rpm, profile);
@@ -483,44 +509,47 @@ class VehicleAudioEngine {
 
         this.popTimeout = setTimeout(() => {
             this.popTimeout = null;
-        }, delay + 280);
+        }, delay + 250);
     }
 
     _createSinglePop(rpm, profile) {
         const now = this.ctx.currentTime;
+        const isTofas = profile.id.includes('tofas');
 
-        // Deep sub-bass cannon thump (75 Hz down to 26 Hz)
+        // Low thump oscillator
         const osc = this.ctx.createOscillator();
         const oscGain = this.ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(75 + Math.random() * 20, now);
-        osc.frequency.exponentialRampToValueAtTime(26, now + 0.10);
+        osc.type = isTofas ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(isTofas ? (120 + Math.random() * 40) : (75 + Math.random() * 20), now);
+        osc.frequency.exponentialRampToValueAtTime(isTofas ? 45 : 26, now + 0.09);
 
-        oscGain.gain.setValueAtTime(0.85 * (this.exhaustMode === 'straight_pipe' ? 1.3 : 1.0), now);
-        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        const popGainVal = (isTofas ? 1.1 : 0.85) * (this.exhaustMode === 'straight_pipe' ? 1.3 : 1.0);
+        oscGain.gain.setValueAtTime(popGainVal, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
 
         osc.connect(oscGain);
         oscGain.connect(this.engineMasterGain);
         osc.start(now);
-        osc.stop(now + 0.13);
+        osc.stop(now + 0.12);
 
-        // Low muffled thud body (peaking around 220 Hz, not tinny crackle)
-        const burstBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.08, this.ctx.sampleRate);
+        // Sharp crackle burst
+        const burstLen = isTofas ? 0.06 : 0.08;
+        const burstBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * burstLen), this.ctx.sampleRate);
         const burstData = burstBuffer.getChannelData(0);
         for (let j = 0; j < burstData.length; j++) {
-            burstData[j] = (Math.random() * 2 - 1) * Math.exp(-j / (this.ctx.sampleRate * 0.025));
+            burstData[j] = (Math.random() * 2 - 1) * Math.exp(-j / (this.ctx.sampleRate * (isTofas ? 0.015 : 0.025)));
         }
 
         const noiseSrc = this.ctx.createBufferSource();
         noiseSrc.buffer = burstBuffer;
 
         const crackleFilter = this.ctx.createBiquadFilter();
-        crackleFilter.type = 'lowpass';
-        crackleFilter.frequency.setValueAtTime(320 + Math.random() * 150, now);
-        crackleFilter.Q.setValueAtTime(1.2, now);
+        crackleFilter.type = isTofas ? 'bandpass' : 'lowpass';
+        crackleFilter.frequency.setValueAtTime(isTofas ? (450 + Math.random() * 300) : (320 + Math.random() * 150), now);
+        crackleFilter.Q.setValueAtTime(isTofas ? 2.5 : 1.2, now);
 
         const crackleGain = this.ctx.createGain();
-        crackleGain.gain.setValueAtTime(0.40, now);
+        crackleGain.gain.setValueAtTime(isTofas ? 0.65 : 0.40, now);
 
         noiseSrc.connect(crackleFilter);
         crackleFilter.connect(crackleGain);
@@ -532,14 +561,14 @@ class VehicleAudioEngine {
         if (!this.ctx || !this.isRunning || this.isShifting) return;
         const now = this.ctx.currentTime;
 
-        const duration = 0.30;
-        const bovBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * duration, this.ctx.sampleRate);
+        const duration = 0.28;
+        const bovBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * duration), this.ctx.sampleRate);
         const bovData = bovBuffer.getChannelData(0);
 
         for (let i = 0; i < bovData.length; i++) {
             const t = i / this.ctx.sampleRate;
-            const flutter = 1.0 + 0.3 * Math.sin(2 * Math.PI * 18 * t);
-            bovData[i] = (Math.random() * 2 - 1) * Math.exp(-t * 9) * flutter;
+            const flutter = 1.0 + 0.35 * Math.sin(2 * Math.PI * 20 * t);
+            bovData[i] = (Math.random() * 2 - 1) * Math.exp(-t * 10) * flutter;
         }
 
         const bovSrc = this.ctx.createBufferSource();
@@ -547,11 +576,11 @@ class VehicleAudioEngine {
 
         const bovFilter = this.ctx.createBiquadFilter();
         bovFilter.type = 'bandpass';
-        bovFilter.frequency.setValueAtTime(650, now); // Deep air release
-        bovFilter.Q.setValueAtTime(1.2, now);
+        bovFilter.frequency.setValueAtTime(680, now);
+        bovFilter.Q.setValueAtTime(1.4, now);
 
         const bovGain = this.ctx.createGain();
-        bovGain.gain.setValueAtTime(0.20, now);
+        bovGain.gain.setValueAtTime(0.24, now);
 
         bovSrc.connect(bovFilter);
         bovFilter.connect(bovGain);
@@ -565,40 +594,45 @@ class VehicleAudioEngine {
         this.isShifting = true;
 
         if (isUpshift) {
-            // DCT torque cut
+            // Crisp torque cut
             this.engineMasterGain.gain.setValueAtTime(0.85, now);
-            this.engineMasterGain.gain.linearRampToValueAtTime(0.12, now + 0.02);
-            this.engineMasterGain.gain.linearRampToValueAtTime(0.85, now + 0.10);
+            this.engineMasterGain.gain.linearRampToValueAtTime(0.10, now + 0.015);
+            this.engineMasterGain.gain.linearRampToValueAtTime(0.85, now + 0.08);
 
             setTimeout(() => {
                 if (this.currentProfile && this.isRunning) {
                     this._createSinglePop(this.lastRpm, this.currentProfile);
                 }
                 this.isShifting = false;
-            }, 55);
+            }, 50);
         } else {
-            // Downshift rev match blip
+            // Rev match throttle blip
             this.engineMasterGain.gain.setValueAtTime(0.85, now);
-            this.engineMasterGain.gain.linearRampToValueAtTime(1.0, now + 0.03);
-            this.engineMasterGain.gain.linearRampToValueAtTime(0.85, now + 0.12);
+            this.engineMasterGain.gain.linearRampToValueAtTime(1.10, now + 0.025);
+            this.engineMasterGain.gain.linearRampToValueAtTime(0.85, now + 0.10);
 
             setTimeout(() => {
-                if (Math.random() < 0.65 && this.currentProfile && this.isRunning) {
+                if (Math.random() < 0.70 && this.currentProfile && this.isRunning) {
                     this._createSinglePop(this.lastRpm, this.currentProfile);
                 }
                 this.isShifting = false;
-            }, 80);
+            }, 70);
         }
     }
 
+    /**
+     * Tofaş / Supercar Ignition Cut Rev Limiter ("tatatatata")
+     */
     triggerRevLimiter() {
         if (!this.ctx || !this.isRunning) return;
         const now = this.ctx.currentTime;
-        this.engineMasterGain.gain.setValueAtTime(0.9, now);
-        this.engineMasterGain.gain.setValueAtTime(0.0, now + 0.025);
-        this.engineMasterGain.gain.setValueAtTime(0.9, now + 0.05);
+        
+        // Fast ignition stutter
+        this.engineMasterGain.gain.setValueAtTime(1.0, now);
+        this.engineMasterGain.gain.setValueAtTime(0.0, now + 0.018);
+        this.engineMasterGain.gain.setValueAtTime(1.0, now + 0.036);
 
-        if (Math.random() < 0.6) {
+        if (Math.random() < 0.75) {
             this._createSinglePop(this.lastRpm, this.currentProfile);
         }
     }

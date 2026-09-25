@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isEngineRunning = true;
 
                 mainStartBtn.classList.add('running');
-                startBtnText.textContent = 'STOP ENGINE';
+                startBtnText.textContent = 'SES AKTİF (DURDUR)';
 
                 requestWakeLock();
 
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error("Audio init error:", err);
-                alert("Please click to permit audio playback in this browser.");
+                alert("Ses sistemi başlatılamadı, lütfen ekrana dokunun.");
             }
         } else {
             isEngineRunning = false;
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             audio.stop();
 
             mainStartBtn.classList.remove('running');
-            startBtnText.textContent = 'MOTORU ÇALIŞTIR';
+            startBtnText.textContent = 'SESİ AÇ / BAŞLAT';
 
             stopGpsTracking();
             releaseWakeLock();
