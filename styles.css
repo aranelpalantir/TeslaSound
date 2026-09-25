@@ -1,0 +1,798 @@
+:root {
+    --bg-primary: #08090d;
+    --bg-surface: #10131a;
+    --bg-panel: #161b24;
+    --border-color: #242c3b;
+    --border-light: #323d50;
+    --text-primary: #f0f4fc;
+    --text-secondary: #94a3b8;
+    --text-dim: #5c687d;
+    --car-accent: #E53E3E;
+    --car-glow: rgba(229, 62, 62, 0.35);
+    --shift-red: #ef4444;
+    --shift-yellow: #f59e0b;
+    --shift-green: #10b981;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background Atmosphere Glow */
+body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(circle, var(--car-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+    transition: background 0.4s ease;
+}
+
+.app-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 16px 20px;
+}
+
+/* Header */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.brand-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--car-accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px var(--car-glow);
+    transition: background 0.3s ease;
+}
+
+.brand-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: white;
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+.brand-name span {
+    color: var(--car-accent);
+    transition: color 0.3s ease;
+}
+
+.header-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.status-dot.active {
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+}
+
+.status-dot.searching {
+    background: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+.btn-icon {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    color: #fff;
+    border-color: var(--border-light);
+}
+
+/* Shift Lights LED Bar */
+.shift-lights-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background: var(--bg-surface);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+.led {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: #1c212d;
+    transition: background 0.08s ease, box-shadow 0.08s ease;
+}
+
+.led.green.on {
+    background: var(--shift-green);
+    box-shadow: 0 0 8px var(--shift-green);
+}
+
+.led.yellow.on {
+    background: var(--shift-yellow);
+    box-shadow: 0 0 8px var(--shift-yellow);
+}
+
+.led.red.on {
+    background: var(--shift-red);
+    box-shadow: 0 0 10px var(--shift-red);
+}
+
+.led.red.flashing {
+    animation: shiftFlash 0.12s infinite alternate;
+}
+
+@keyframes shiftFlash {
+    from { background: #1c212d; box-shadow: none; }
+    to { background: var(--shift-red); box-shadow: 0 0 14px var(--shift-red); }
+}
+
+/* Cockpit Cluster Main Grid */
+.cockpit-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 860px) {
+    .cockpit-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Central Instrument Gauge (Tachometer & Speedometer) */
+.instrument-card {
+    grid-column: 2;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 860px) {
+    .instrument-card {
+        grid-column: 1;
+    }
+}
+
+.gauge-canvas-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#gaugeCanvas {
+    width: 280px;
+    height: 280px;
+}
+
+.gauge-center-readout {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.gear-display {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+    text-shadow: 0 0 16px var(--car-glow);
+    font-family: monospace, sans-serif;
+}
+
+.gear-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.speed-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--car-accent);
+    line-height: 1;
+    font-family: monospace, sans-serif;
+    transition: color 0.3s ease;
+}
+
+.speed-unit {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+}
+
+/* Left & Right Telemetry Cards */
+.telemetry-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.telemetry-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.telemetry-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+}
+
+.telemetry-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: monospace, sans-serif;
+}
+
+.meter-bar-container {
+    height: 6px;
+    background: var(--bg-panel);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.meter-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--car-accent);
+    transition: width 0.08s ease, background 0.3s ease;
+}
+
+/* Visualizer Canvas */
+.visualizer-wrapper {
+    width: 100%;
+    height: 48px;
+    background: var(--bg-panel);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+#visualizerCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Car Selector Carousel */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.cars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.car-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.car-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    transition: background 0.25s ease;
+}
+
+.car-card:hover {
+    border-color: var(--border-light);
+    transform: translateY(-2px);
+}
+
+.car-card.selected {
+    border-color: var(--car-accent);
+    background: var(--bg-panel);
+    box-shadow: 0 4px 20px var(--car-glow);
+}
+
+.car-card.selected::before {
+    background: var(--car-accent);
+}
+
+.car-badge {
+    align-self: flex-start;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: var(--bg-panel);
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.car-card.selected .car-badge {
+    color: var(--car-accent);
+    border-color: var(--car-accent);
+}
+
+.car-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.car-engine-type {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+/* Control Strip */
+.controls-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.main-start-btn {
+    flex: 1 1 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--car-accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 15px var(--car-glow);
+    transition: all 0.25s ease;
+}
+
+.main-start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px var(--car-glow);
+}
+
+.main-start-btn.running {
+    background: #1e293b;
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+.pill-toggle {
+    display: flex;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.pill-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pill-btn.active {
+    background: var(--bg-surface);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Simulator Test Bench Drawer */
+.simulator-drawer {
+    margin-top: 14px;
+    background: var(--bg-panel);
+    border: 1px dashed var(--border-light);
+    border-radius: 14px;
+    padding: 16px;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.simulator-drawer.active {
+    display: flex;
+}
+
+.sim-pedals-row {
+    display: flex;
+    gap: 14px;
+}
+
+.sim-pedal-btn {
+    flex: 1;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.1s;
+}
+
+.sim-gas-btn {
+    background: #064e3b;
+    color: #6ee7b7;
+    border-color: #059669;
+}
+
+.sim-gas-btn:active, .sim-gas-btn.pressed {
+    background: #059669;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(5, 150, 105, 0.5);
+    transform: scale(0.98);
+}
+
+.sim-brake-btn {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-color: #dc2626;
+}
+
+.sim-brake-btn:active, .sim-brake-btn.pressed {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+    transform: scale(0.98);
+}
+
+.sim-paddles-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.paddle-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.paddle-btn:hover {
+    border-color: var(--car-accent);
+}
+
+.paddle-btn:active {
+    transform: scale(0.95);
+    background: var(--car-accent);
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider-container input[type="range"] {
+    flex: 1;
+    accent-color: var(--car-accent);
+    cursor: pointer;
+}
+
+/* Steering Wheel & Mobile Guidance Footer */
+.footer-tips {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.6;
+}
+
+.footer-tips kbd {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+/* Modal Overlay & Dialog */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(4, 5, 8, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.guide-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.guide-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 8px;
+    background: var(--bg-panel);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.guide-item strong {
+    display: block;
+    color: #ffffff;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.guide-item p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-btn {
+    background: var(--car-accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+}
+
+.modal-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
