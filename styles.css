@@ -156,7 +156,7 @@ body::before {
 .btn-icon {
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
-    color: var(--text-secondary);
+    color: #cbd5e1;
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
@@ -170,6 +170,7 @@ body::before {
 .btn-icon:hover {
     color: #fff;
     border-color: var(--border-light);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* Shift Lights LED Bar */
