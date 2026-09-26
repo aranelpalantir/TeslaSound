@@ -12,11 +12,10 @@ Herhangi bir harici donanım veya OBD adaptörü gerektirmeden, aracın dahili t
 
 ---
 
-## 🌐 Canlı Demo & Bağlantılar
+## 🌐 Canlı Demo (EV Cockpit)
 
-Uygulamaya doğrudan tarayıcınızdan veya aracınızın ekranından erişebilirsiniz:
-- 🚀 **Cloudflare Pages (Canlı Uygulama):** **[https://teslasound.pages.dev/](https://teslasound.pages.dev/)**
-- 🐙 **GitHub Açık Kaynak Deposu:** **[https://github.com/aranelpalantir/TeslaSound](https://github.com/aranelpalantir/TeslaSound)**
+Uygulamayı tarayıcınızdan veya Tesla/EV ekranından doğrudan deneyimleyebilirsiniz:  
+👉 **[https://teslasound.pages.dev/](https://teslasound.pages.dev/)**
 
 ---
 
