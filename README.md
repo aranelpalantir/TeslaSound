@@ -3,11 +3,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Web Audio API](https://img.shields.io/badge/Web%20Audio-Procedural%20Synthesis-blue.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 [![Tesla Browser](https://img.shields.io/badge/Tesla%20In--Car%20Browser-Compatible-red.svg)](https://www.tesla.com)
-[![Pure Vanilla JS](https://img.shields.io/badge/Vanilla%20JS-Zero%20Dependencies-brightgreen.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Cloudflare Pages](https://img.shields.io/badge/Deployed%20with-Cloudflare%20Pages-F38020.svg?logo=cloudflare)](https://teslasound.pages.dev/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-teslasound.pages.dev-success.svg)](https://teslasound.pages.dev/)
 
 **TeslaSound**, başta **Tesla** olmak üzere tüm elektrikli araçlar (EV) için geliştirilmiş gerçek zamanlı, GPS ve ivme duyarlı **sanal motor sesi kokpitidir**.
 
 Herhangi bir harici donanım veya OBD adaptörü gerektirmeden, aracın dahili tarayıcısında (Tesla Browser) veya akıllı telefon/tablet üzerinde çalışır. Aracın gerçek zamanlı GPS hızını ve ivmesini (G-kuvveti) analiz ederek safkan içten yanmalı motor seslerini (V8, V10, V12, Boxer Flat-6, 5 Silindir Turbo ve efsanevi Tofaş SLX / Şahin Varex) **Web Audio API prosedürel ses sentezleme motoru** ile sıfır gecikmeyle üretir.
+
+---
+
+## 🌐 Canlı Demo & Bağlantılar
+
+Uygulamaya doğrudan tarayıcınızdan veya aracınızın ekranından erişebilirsiniz:
+- 🚀 **Cloudflare Pages (Canlı Uygulama):** **[https://teslasound.pages.dev/](https://teslasound.pages.dev/)**
+- 🐙 **GitHub Açık Kaynak Deposu:** **[https://github.com/aranelpalantir/TeslaSound](https://github.com/aranelpalantir/TeslaSound)**
 
 ---
 
