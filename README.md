@@ -5,6 +5,7 @@
 [![Tesla Browser](https://img.shields.io/badge/Tesla%20In--Car%20Browser-Compatible-red.svg)](https://www.tesla.com)
 [![Cloudflare Pages](https://img.shields.io/badge/Deployed%20with-Cloudflare%20Pages-F38020.svg?logo=cloudflare)](https://teslasound.pages.dev/)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-teslasound.pages.dev-success.svg)](https://teslasound.pages.dev/)
+[![AI-Assisted](https://img.shields.io/badge/Developed%20with-AI%20Pair%20Programming-8A2BE2.svg)](#)
 
 **TeslaSound**, başta **Tesla** olmak üzere tüm elektrikli araçlar (EV) için geliştirilmiş gerçek zamanlı, GPS ve ivme duyarlı **sanal motor sesi kokpitidir**.
 
@@ -115,6 +116,12 @@ TeslaSound/
 ├── vehicles.js        # Araç profilleri, şanzıman oranları ve harmonik akustik konfigürasyonları
 └── app.js             # UI olay yönetimi, telemetri çizimi ve durum yönetimi
 ```
+
+---
+
+## 🤖 Geliştirme Süreci (AI-Assisted Engineering)
+
+Bu projedeki Web Audio DSP ses sentezleme algoritmaları, motor harmonik frekansları, akustik filtre modellemeleri ve 60 FPS öngörülü araç dinamiği fiziği, **yapay zeka destekli eşli programlama (AI Pair Programming)** mimarisiyle sıfırdan tasarlanıp optimize edilmiştir.
 
 ---
 
