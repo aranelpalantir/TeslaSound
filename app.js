@@ -583,4 +583,18 @@ document.addEventListener('DOMContentLoaded', () => {
     renderVehicles();
     selectVehicle(VEHICLE_PROFILES[0]);
     requestAnimationFrame(mainLoop);
+
+    // Register PWA Service Worker (Safari/WebKit Redirect-Safe)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => {
+                    console.log('TeslaSound PWA Service Worker aktif:', reg.scope);
+                    reg.update();
+                })
+                .catch(err => {
+                    console.warn('Service Worker kaydı yapılamadı:', err);
+                });
+        });
+    }
 });

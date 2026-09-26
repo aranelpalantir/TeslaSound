@@ -5,6 +5,7 @@
 [![Tesla Browser](https://img.shields.io/badge/Tesla%20In--Car%20Browser-Compatible-red.svg)](https://www.tesla.com)
 [![Cloudflare Pages](https://img.shields.io/badge/Deployed%20with-Cloudflare%20Pages-F38020.svg?logo=cloudflare)](https://teslasound.pages.dev/)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-teslasound.pages.dev-success.svg)](https://teslasound.pages.dev/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Installable%20%26%20Offline-blue.svg)](https://teslasound.pages.dev/)
 [![AI-Assisted](https://img.shields.io/badge/Developed%20with-AI%20Pair%20Programming-8A2BE2.svg)](#)
 
 **TeslaSound**, başta **Tesla** olmak üzere tüm elektrikli araçlar (EV) için geliştirilmiş gerçek zamanlı, GPS ve ivme duyarlı **sanal motor sesi kokpitidir**.
@@ -48,6 +49,10 @@ Uygulamayı tarayıcınızdan veya Tesla/EV ekranından doğrudan deneyimleyebil
 
 - 🚀 **Sıfır Bağımlılık & Hızlı Başlangıç:**
   - Node paketleri, derleme adımları veya karmaşık kurulumlar gerektirmez. Saf HTML5, CSS3 ve Vanilla JavaScript.
+
+- 📱 **Tam PWA & Çevrimdışı (Offline) Desteği:**
+  - Safari WebKit yönlendirme korumalı Service Worker ve Web App Manifest mimarisi.
+  - iPhone veya Android'de *"Ana Ekrana Ekle"* diyerek bağımsız tam ekran uygulama olarak çalıştırılabilir; tünellerde ve internet kesintilerinde ses motoru sıfır gecikmeyle çalışmaya devam eder.
 
 ---
 

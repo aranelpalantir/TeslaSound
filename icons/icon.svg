@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1d26"/>
+      <stop offset="100%" stop-color="#08090d"/>
+    </linearGradient>
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="100%" stop-color="#B91C1C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background container -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+  <circle cx="256" cy="256" r="210" fill="url(#glowGrad)"/>
+
+  <!-- Soundwave / Tachometer Arc Rings -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#EF4444" stroke-width="6" stroke-dasharray="16 12" stroke-opacity="0.6"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#F59E0B" stroke-width="4" stroke-dasharray="8 8" stroke-opacity="0.4"/>
+
+  <!-- Center Badge with Car Silhouette -->
+  <g transform="translate(96, 96)">
+    <rect width="320" height="320" rx="72" fill="url(#badgeGrad)"/>
+    <g transform="translate(40, 40) scale(10)">
+      <path fill="#FFFFFF" d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-4.66l.12-.34h13.77l.11.34V17z"/>
+      <circle fill="#FFFFFF" cx="7.5" cy="14.5" r="1.5"/>
+      <circle fill="#FFFFFF" cx="16.5" cy="14.5" r="1.5"/>
+    </g>
+  </g>
+</svg>
