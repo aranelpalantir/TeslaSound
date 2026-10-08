@@ -28,7 +28,23 @@
                 <div class="brand-name">Tesla<span>Sound</span></div>
             </div>
 
+            <!-- Tactical Supercar ENGINE START / STOP Button -->
+            <button class="engine-start-stop-btn off" id="engineStartStopBtn" title="Motoru Çalıştır / Durdur (Boşluk Tuşu)" aria-label="Motoru Çalıştır / Durdur">
+                <span class="engine-btn-halo"></span>
+                <span class="engine-btn-bezel">
+                    <svg class="engine-power-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                    </svg>
+                    <span class="engine-btn-label" id="engineBtnLabel">START ENGINE</span>
+                </span>
+            </button>
+
             <div class="header-badges">
+                <div class="status-badge" id="engineBadge" style="border-color: rgba(239, 68, 68, 0.35);">
+                    <div class="status-dot" id="engineStatusDot" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+                    <span id="engineBadgeText" style="color: #f87171;">STANDBY</span>
+                </div>
                 <div class="status-badge" id="gpsBadge">
                     <div class="status-dot" id="gpsStatusDot"></div>
                     <span id="gpsStatusText">GPS STANDBY</span>
@@ -154,13 +170,6 @@
 
         <!-- Primary Controls Strip -->
         <section class="controls-card">
-            <button class="main-start-btn" id="mainStartBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-                </svg>
-                <span id="startBtnText">MOTORU ÇALIŞTIR</span>
-            </button>
-
             <!-- Mode Selector: Auto vs Manual -->
             <div class="control-group">
                 <span class="control-label">Vites Modu:</span>
@@ -187,6 +196,14 @@
                     <button class="pill-btn" data-exhaust="sport">Sport</button>
                     <button class="pill-btn active" data-exhaust="race">Race</button>
                     <button class="pill-btn" data-exhaust="straight_pipe">Düz Boru</button>
+                </div>
+            </div>
+
+            <!-- Auto-Start Ignition Preference -->
+            <div class="control-group">
+                <span class="control-label">Oto-Marş:</span>
+                <div class="pill-toggle">
+                    <button class="pill-btn" id="autoStartBtn" title="Sayfa ilk açıldığında otomatik marşa basılsın mı?">Açık</button>
                 </div>
             </div>
 
@@ -223,7 +240,7 @@
         <!-- Guidance & Tesla Scroll Wheel Footer -->
         <footer class="footer-tips">
             <p><strong>Tesla İpucu:</strong> Bu sayfayı doğrudan Tesla'nın dahili Chromium tarayıcısında açabilirsiniz. Direksiyonun <strong>sol/sağ kaydırma tekerleğini</strong> yukarı/aşağı çevirerek manuel vites değiştirebilirsiniz!</p>
-            <p style="margin-top: 4px;">Klavye Kısayolları: <kbd>Space</kbd> Motor Aç/Kapa | <kbd>W</kbd> Gaz | <kbd>S</kbd> Fren | <kbd>E</kbd> Vites Büyüt | <kbd>Q</kbd> Vites Küçült</p>
+            <p style="margin-top: 4px;">Klavye Kısayolları: <kbd>W</kbd> Gaz | <kbd>S</kbd> Fren | <kbd>E</kbd> Vites Büyüt | <kbd>Q</kbd> Vites Küçült | <kbd>M</kbd> Sesi Kapat/Aç</p>
         </footer>
     </div>
 
@@ -245,8 +262,8 @@
                 <div class="guide-item">
                     <span class="guide-icon">🛰️</span>
                     <div>
-                        <strong>2. GPS ve Gerçek Zamanlı Fizik</strong>
-                        <p><strong>"MOTORU ÇALIŞTIR"</strong> düğmesine basın ve GPS iznini onaylayın. Sistem sıradan uygulamalar (Dribe vb.) gibi tekdüze ses çalmaz; 60 FPS öngörülü fizik motoruyla ivmeyi (G-kuvvetini) hesaplar, motor yüküne göre egzoz valflerini açar ve vitesleri dinamik değiştirir.</p>
+                        <strong>2. Otomatik Çalışma ve Gerçek Zamanlı Fizik</strong>
+                        <p>Sayfa açıldığında motor otomatik çalışır ve rölantiye geçer. Tarayıcınızın GPS ve hareket izinlerini onaylamanız yeterlidir. Sistem 60 FPS öngörülü fizik ve donanım ivmeölçeriyle motor yüküne göre egzoz valflerini açar ve vitesleri dinamik değiştirir.</p>
                     </div>
                 </div>
                 <div class="guide-item">

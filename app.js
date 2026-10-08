@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const physics = new VehiclePhysics(audio);
 
     // 2. DOM Elements
-    const mainStartBtn = document.getElementById('mainStartBtn');
-    const startBtnText = document.getElementById('startBtnText');
     const carsGrid = document.getElementById('carsGrid');
     const gaugeCanvas = document.getElementById('gaugeCanvas');
     const gaugeCtx = gaugeCanvas.getContext('2d');
@@ -27,6 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const accelValue = document.getElementById('accelValue');
     const gpsStatusDot = document.getElementById('gpsStatusDot');
     const gpsStatusText = document.getElementById('gpsStatusText');
+
+    // Engine Start / Stop & Status Elements
+    const engineStartStopBtn = document.getElementById('engineStartStopBtn');
+    const engineBtnLabel = document.getElementById('engineBtnLabel');
+    const engineBadge = document.getElementById('engineBadge');
+    const engineStatusDot = document.getElementById('engineStatusDot');
+    const engineBadgeText = document.getElementById('engineBadgeText');
+    const autoStartBtn = document.getElementById('autoStartBtn');
 
     // Controls
     const driveModeAuto = document.getElementById('modeAuto');
@@ -120,49 +126,175 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 4. Start / Stop Engine
-    async function toggleEngine() {
-        if (!isEngineRunning) {
-            try {
-                await audio.init();
-                physics.isEngineRunning = true;
-                physics.setProfile(selectedVehicle);
-                audio.loadProfile(selectedVehicle);
-                audio.start();
+    // 4. Tactical Supercar Engine Start / Stop Controller
+    let autoStartEnabled = localStorage.getItem('teslasound_autostart') === 'true';
+
+    function updateAutoStartUI() {
+        if (autoStartBtn) {
+            autoStartBtn.textContent = autoStartEnabled ? 'Açık' : 'Kapalı';
+            if (autoStartEnabled) {
+                autoStartBtn.classList.add('active');
+            } else {
+                autoStartBtn.classList.remove('active');
+            }
+        }
+    }
+    updateAutoStartUI();
+
+    if (autoStartBtn) {
+        autoStartBtn.addEventListener('click', () => {
+            autoStartEnabled = !autoStartEnabled;
+            localStorage.setItem('teslasound_autostart', autoStartEnabled ? 'true' : 'false');
+            updateAutoStartUI();
+        });
+    }
+
+    function updateEngineButtonUI(state) {
+        if (!engineStartStopBtn) return;
+
+        if (state === 'cranking') {
+            engineStartStopBtn.className = 'engine-start-stop-btn cranking';
+            if (engineBtnLabel) engineBtnLabel.textContent = 'CRANKING...';
+            if (engineStatusDot) {
+                engineStatusDot.style.background = '#f59e0b';
+                engineStatusDot.style.boxShadow = '0 0 10px #f59e0b';
+            }
+            if (engineBadgeText) {
+                engineBadgeText.textContent = 'MARŞ ALIYOR';
+                engineBadgeText.style.color = '#fbbf24';
+            }
+            if (engineBadge) engineBadge.style.borderColor = 'rgba(245, 158, 11, 0.45)';
+        } else if (state === 'running') {
+            engineStartStopBtn.className = 'engine-start-stop-btn running';
+            if (engineBtnLabel) engineBtnLabel.textContent = 'STOP ENGINE';
+            if (engineStatusDot) {
+                engineStatusDot.style.background = '#22c55e';
+                engineStatusDot.style.boxShadow = '0 0 8px #22c55e';
+            }
+            if (engineBadgeText) {
+                engineBadgeText.textContent = 'MOTOR AKTİF';
+                engineBadgeText.style.color = '#4ade80';
+            }
+            if (engineBadge) engineBadge.style.borderColor = 'rgba(34, 197, 94, 0.35)';
+        } else {
+            // off / standby
+            engineStartStopBtn.className = 'engine-start-stop-btn off';
+            if (engineBtnLabel) engineBtnLabel.textContent = 'START ENGINE';
+            if (engineStatusDot) {
+                engineStatusDot.style.background = '#ef4444';
+                engineStatusDot.style.boxShadow = '0 0 8px #ef4444';
+            }
+            if (engineBadgeText) {
+                engineBadgeText.textContent = 'STANDBY';
+                engineBadgeText.style.color = '#f87171';
+            }
+            if (engineBadge) engineBadge.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+        }
+    }
+
+    async function startEngine() {
+        if (physics.isStarting || isEngineRunning) return;
+        try {
+            await audio.init();
+            physics.setProfile(selectedVehicle);
+            audio.loadProfile(selectedVehicle);
+
+            updateEngineButtonUI('cranking');
+
+            physics.startEngineSequence(() => {
                 isEngineRunning = true;
-
-                mainStartBtn.classList.add('running');
-                startBtnText.textContent = 'MOTORU DURDUR';
-
+                updateEngineButtonUI('running');
                 requestWakeLock();
 
                 if (!physics.isSimulating) {
                     startGpsTracking();
+                    startMotionTracking();
                 }
-            } catch (err) {
-                console.error("Audio init error:", err);
-                alert("Ses sistemi başlatılamadı, lütfen ekrana dokunun.");
-            }
-        } else {
-            isEngineRunning = false;
-            physics.isEngineRunning = false;
-            physics.setSimPedal(false);
-            physics.setSimBrake(false);
-            if (simGasBtn) simGasBtn.classList.remove('pressed');
-            if (simBrakeBtn) simBrakeBtn.classList.remove('pressed');
-
-            audio.stop();
-
-            mainStartBtn.classList.remove('running');
-            startBtnText.textContent = 'MOTORU ÇALIŞTIR';
-
-            stopGpsTracking();
-            releaseWakeLock();
+            });
+        } catch (err) {
+            console.warn("Audio start error:", err);
+            updateEngineButtonUI('off');
         }
     }
-    mainStartBtn.addEventListener('click', toggleEngine);
 
-    // 5. GPS Tracking
+    function stopEngine() {
+        if (!isEngineRunning && !physics.isStarting) return;
+        isEngineRunning = false;
+        updateEngineButtonUI('off');
+
+        physics.stopEngine(() => {
+            audio.stop();
+        });
+
+        stopGpsTracking();
+        stopMotionTracking();
+        releaseWakeLock();
+    }
+
+    function toggleEngine() {
+        if (physics.isStarting) return;
+        if (isEngineRunning) {
+            stopEngine();
+        } else {
+            startEngine();
+        }
+    }
+
+    if (engineStartStopBtn) {
+        engineStartStopBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleEngine();
+        });
+    }
+
+    // Browser Autoplay Policy: If auto-start is active, first touch starts engine
+    const unlockOnUserGesture = async () => {
+        if (!audio.ctx || audio.ctx.state === 'suspended') {
+            await audio.init();
+        }
+        if (autoStartEnabled && !isEngineRunning && !physics.isStarting) {
+            await startEngine();
+        }
+        ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(evt => {
+            document.removeEventListener(evt, unlockOnUserGesture);
+        });
+    };
+    ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, unlockOnUserGesture, { passive: true });
+    });
+
+    // 5. GPS & Accelerometer Tracking (Hybrid 60Hz IMU + GPS)
+    let motionHandler = null;
+
+    function startMotionTracking() {
+        if (typeof window.DeviceMotionEvent !== 'undefined') {
+            motionHandler = (event) => {
+                if (isEngineRunning && !physics.isSimulating) {
+                    physics.handleMotionUpdate(event);
+                }
+            };
+
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then((perm) => {
+                        if (perm === 'granted') {
+                            window.addEventListener('devicemotion', motionHandler, { passive: true });
+                        }
+                    })
+                    .catch(() => {});
+            } else {
+                window.addEventListener('devicemotion', motionHandler, { passive: true });
+            }
+        }
+    }
+
+    function stopMotionTracking() {
+        if (motionHandler) {
+            window.removeEventListener('devicemotion', motionHandler);
+            motionHandler = null;
+        }
+    }
+
     function startGpsTracking() {
         if (!navigator.geolocation) {
             gpsStatusDot.className = 'status-dot';
@@ -177,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
             (pos) => {
                 gpsStatusDot.className = 'status-dot active';
                 const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : '--';
-                gpsStatusText.textContent = `GPS LOCKED (±${acc}m)`;
+                gpsStatusText.textContent = `GPS + IMU LOCKED (±${acc}m)`;
                 physics.handleGpsUpdate(pos);
             },
             (err) => {
@@ -238,7 +370,10 @@ document.addEventListener('DOMContentLoaded', () => {
         sourceSim.classList.remove('active');
         simDrawer.classList.remove('active');
         physics.isSimulating = false;
-        if (isEngineRunning) startGpsTracking();
+        if (isEngineRunning) {
+            startGpsTracking();
+            startMotionTracking();
+        }
     });
 
     sourceSim.addEventListener('click', () => {
@@ -247,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         simDrawer.classList.add('active');
         physics.isSimulating = true;
         stopGpsTracking();
+        stopMotionTracking();
         gpsStatusDot.className = 'status-dot active';
         gpsStatusText.textContent = 'TEST BENCH ACTIVE';
     });
@@ -344,6 +480,15 @@ document.addEventListener('DOMContentLoaded', () => {
             physics.shiftUp();
         } else if (e.code === 'KeyQ' || e.code === 'BracketLeft') {
             physics.shiftDown();
+        } else if (e.code === 'KeyM') {
+            e.preventDefault();
+            if (audio.masterVolume > 0) {
+                audio.setMasterVolume(0);
+                if (volumeSlider) volumeSlider.value = 0;
+            } else {
+                audio.setMasterVolume(0.85);
+                if (volumeSlider) volumeSlider.value = 0.85;
+            }
         } else if (e.code === 'Space') {
             e.preventDefault();
             toggleEngine();
@@ -582,6 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize UI
     renderVehicles();
     selectVehicle(VEHICLE_PROFILES[0]);
+    updateEngineButtonUI('off');
     requestAnimationFrame(mainLoop);
 
     // Register PWA Service Worker (Safari/WebKit Redirect-Safe)

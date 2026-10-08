@@ -62,7 +62,11 @@ Uygulamayı tarayıcınızdan veya Tesla/EV ekranından doğrudan deneyimleyebil
 | :--- | :--- | :--- | :--- |
 | **Tofaş Doğan SLX 1.6** | 1.6L 8V SOHC (Abart Egzoz / Düz Boru) | 6,800 RPM | Efsane Tempra motoru, 2. vites bağırtması, çatara patara egzoz patlatması. |
 | **Tofaş Şahin S (Varex)** | 1.6L Karbüratörlü (Açık Varex & Kesicili) | 7,000 RPM | Açık Varex düz boru yırtılması, dip gaz kesici (tatatata) ve patırtılar. |
+| **BMW M3 E46 (S54)** | 3.2L Atmosferik Sıralı 6 (Metalik CSL Rasp) | 8,200 RPM | Efsanevi S54 metalik egzoz zırıltısı ("CSL rasp"), 8.200 devir çığlığı ve SMG vites patlamaları. |
 | **Shelby Mustang GT500** | 5.2L Supercharged Crossplane V8 | 7,500 RPM | Tok Amerikan V8 homurtusu ve yüksek devirde yırtıcı kompresör (supercharger) ıslığı. |
+| **Mercedes-Benz C63 AMG** | 6.2L Naturally Aspirated V8 (M156 Safkan Canavar) | 7,400 RPM | Efsanevi M156 6.2L atmosferik V8 gök gürültüsü, kalın kaslı Alman homurtusu ve Speedshift ara gaz patlamaları. |
+| **Nissan Skyline GT-R R34** | 2.6L Twin-Turbo Düz-6 (RB26DETT Godzilla) | 8,200 RPM | JDM efsanesi RB26 twin-turbo sesi, düz boru yırtılması, çift turbo ıslığı ve Godzilla alev patlamaları. |
+| **Subaru Impreza WRX STI** | 2.5L Turbo Boxer-4 (UEL Headers Boxer Rumble) | 7,500 RPM | WRC efsanesi eşit olmayan (UEL) egzoz manifolduyla meşhur derin Subaru bokser homurtusu ve turbo çufff. |
 | **Porsche 911 GT3 RS** | 4.0L Atmosferik Flat-6 | 9,000 RPM | Safkan atmosferik boksör kükremesi ve 9.000 devir yarış çığlığı. |
 | **Lamborghini Huracán** | 5.2L Doğal Emişli V10 | 8,500 RPM | Yırtıcı İtalyan V10 çığlığı, sert DCT vites patlamaları. |
 | **Ferrari 812 Superfast** | 6.5L Naturally Aspirated V12 | 8,900 RPM | Safkan F1 senfonisi, yüksek devir harmonikleri ve kusursuz vites geçişleri. |
@@ -76,14 +80,17 @@ Uygulamayı tarayıcınızdan veya Tesla/EV ekranından doğrudan deneyimleyebil
 ### Araçta Kullanım (Tesla / EV):
 1. Aracınızın ekranındaki tarayıcıdan (veya telefonunuzdan) projeyi açın.
 2. Bluetooth ile aracın ses sistemine bağlanın.
-3. **"MOTORU ÇALIŞTIR"** butonuna basın ve tarayıcının **GPS (Konum)** erişimine izin verin.
-4. Tam ekran moduna geçin.
-5. Gaza bastığınızda ve hızlandığınızda ses motor yüküne ve devir oranlarına göre otomatik şekillenecektir!
+3. Kırmızı **"START ENGINE"** butonuna basın (veya <kbd>Space</kbd> tuşuna dokunun).
+4. Gerçekçi marş motoru ve ilk gaz patlaması ile motor rölantiye oturur.
+5. Tam ekran moduna geçin ve tarayıcının **GPS (Konum)** erişimine izin verin.
+6. Gaza bastığınızda ve hızlandığınızda ses motor yüküne ve devir oranlarına göre otomatik şekillenecektir!
 
 ### Test Masası / Klavye Kısayolları (Masaüstü):
-- **Kaynak Seçici:** Test Masası modunu seçin.
+- **START / STOP Butonu** veya <kbd>Space</kbd> : Motoru Çalıştır / Durdur (Marş & Kontak Kapatma)
 - <kbd>W</kbd> veya <kbd>↑</kbd> : Gaz (Hızlanma / Throttle)
 - <kbd>S</kbd> veya <kbd>↓</kbd> : Fren (Yavaşlama / Brake)
+- <kbd>E</kbd> / <kbd>Q</kbd> : Vites Yükselt / Düşür
+- <kbd>M</kbd> : Sesi Aç / Kapat (Mute)
 - **Fare Tekerleği (Scroll):** Manuel modda vites büyütme / küçültme
 - **Hız Kaydırıcısı:** İstenilen hıza doğrudan geçiş
 

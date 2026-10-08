@@ -1,5 +1,4 @@
-// TeslaSound - Service Worker (Safari/WebKit Redirect-Safe PWA)
-const CACHE_NAME = 'teslasound-v2';
+const CACHE_NAME = 'teslasound-v12';
 const ASSETS_TO_CACHE = [
   './',
   './styles.css',
